@@ -7,7 +7,7 @@ import ShopPage from './pages/shop/shop.component';
 import Header from './components/header/header.component';
 import SignInAndSignUpPage from './pages/sign-in and sign-up/sign-in and sign-up';
 import Footer from './components/footer/footer';
-import {auth} from './firebase/firebase.utils';
+import {auth, createUserProfileDocument} from './firebase/firebase.utils';
 
 
 class App extends React.Component {
@@ -22,10 +22,27 @@ class App extends React.Component {
   unsubscribeFromAuth = null
 
   componentDidMount() {  //this one open the subscription
-    this.unsubscribeFromAuth =  auth.onAuthStateChanged(user => {
-      this.setState({currentUser:user});
+    this.unsubscribeFromAuth =  auth.onAuthStateChanged(async userAuth => {
+      //this.setState({currentUser:user});
+      // createUserProfileDOcument(user);
+     // console.log(user);
 
-      console.log(user);
+     /* In this we check the user is exists or not  */
+     if(userAuth) {
+       const userRef = await createUserProfileDocument(userAuth);
+
+       userRef.onSnapshot(snapShot => {
+          this.setState({
+            currentUser:{
+              id: snapShot.id,
+              ...snapShot.data() //this gives the all data from snapshot
+            }
+          });
+       });
+       console.log(this.state);
+     }
+
+      this.setState({currentUser:userAuth});
     });
   }
 
